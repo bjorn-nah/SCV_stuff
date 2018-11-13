@@ -1,0 +1,27 @@
+ASM:						OPCODE:			Comments:
+
+DB	'H'						48				Header
+
+A8001:	DI					48 24
+	LXI	SP,0FFD2H			04 D2 FF
+	EI						20
+
+	CALT	08CH			86				Clear Text Area
+
+											Set VDC
+	LXI	H,VDC_DATA			34 20 80 		VDC_DATA $8020
+	LXI	D,03400H			24 00 34
+	MVI	C,003H				6B 03
+	BLOCK					31
+
+											Print Massage
+	LXI	H,MS_DATA			34 30 80 		MS_DATA $8030
+	LXI	D,03043H			24 43 30		Text RAM Address 
+	LXI	B,000FH				14 0F 00 		Text is 0F long
+
+LOOP0:	BLOCK				31				copy in text RAM loop
+	DCR	B					52
+	JR	LOOP0				FD
+
+LOOP1:	NOP					00				infinite loop
+	JR	LOOP1				FE

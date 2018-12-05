@@ -1,27 +1,35 @@
-ASM:						OPCODE:			Comments:
+ASM:					OPCODE:			Comments:
 
-DB	'H'						48				Header
+DB	'H'				48			Header
 
-A8001:	DI					48 24
-	LXI	SP,0FFD2H			04 D2 FF
-	EI						20
+A8001:	DI				48 24			Disable interupts
+	LXI	SP,0FFD2H		04 D2 FF		Set Stack pointer register
+	EI				20			Enable interupts
 
-	CALT	08CH			86				Clear Text Area
+	CALT	08CH			86			Clear Text Area (BIOS Function)
 
-											Set VDC
-	LXI	H,VDC_DATA			34 20 80 		VDC_DATA $8020
-	LXI	D,03400H			24 00 34
-	MVI	C,003H				6B 03
-	BLOCK					31
+								Set VDC
+	LXI	H,VDC_DATA		34 20 80 		VDC_DATA $8020
+	LXI	D,03400H		24 00 34
+	MVI	C,003H			6B 03
+	BLOCK				31
 
-											Print Massage
-	LXI	H,MS_DATA			34 30 80 		MS_DATA $8030
-	LXI	D,03043H			24 43 30		Text RAM Address 
-	LXI	B,000FH				14 0F 00 		Text is 0F long
+								Print Massage
+	LXI	H,MS_DATA		34 30 80 		MS_DATA $8030
+	LXI	D,03043H		24 43 30		Text RAM Address 
+	LXI	B,000FH			14 0F 00 		Text is 0F long
 
-LOOP0:	BLOCK				31				copy in text RAM loop
-	DCR	B					52
-	JR	LOOP0				FD
+LOOP0:	BLOCK				31			copy in text RAM loop
+	DCR	B			52
+	JR	LOOP0			FD
 
-LOOP1:	NOP					00				infinite loop
-	JR	LOOP1				FE
+LOOP1:	NOP				00			infinite loop
+	JR	LOOP1			FE
+
+$8020					C0 00 00 F2		text top left / ? / ? / white txt & blue BG
+
+$8030					48 45 4C 4C		H E L L
+					4F 20 57 4F		O   W O
+					52 4C 44 20		R L D
+					53 43 56 21		S C V !
+						

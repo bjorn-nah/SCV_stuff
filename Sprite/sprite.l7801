@@ -28,7 +28,8 @@ section{"rom", org=0x8000}
     block
 
 @loop_1
-	nop
+	mov v, (0xFFDB)		-- move the FFDB register (number of INT2)
+	mov (0x3200),v		-- to the sprite y argument 
     jr loop_1
 	
 section{"vdc_data", org=0x8100}

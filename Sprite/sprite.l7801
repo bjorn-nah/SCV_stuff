@@ -29,12 +29,27 @@ section{"rom", org=0x8000}
 
 @loop_1
 	mov a, (0xFFDB)		-- move the FFDB register (number of INT2))
+	mov b,a
 	lxi de,sin_wave		-- store sin_wave adress in DE
 	add e,a				-- add a value to low Bit of DE
 	ldax (de)			-- load index in sin_wave table
+	rlr a
+	mvi v,0x40
+	add a,v
 	mov (0x3200),a		-- to the sprite y argument 
-	--mov (0x3202),v
-    jr loop_1
+	
+	mvi a,0x1f
+	add a,b
+	lxi de,sin_wave
+	add e,a
+	ldax (de)
+	rlr a
+	mvi v,0x30
+	add a,v
+	mov (0x3202),a
+	
+    jre loop_1
+	--jmp loop_1
 	
 section{"vdc_data", org=0x8100}
     dc.b 0x32,0x08,0x00,0x00

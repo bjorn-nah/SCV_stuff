@@ -31,19 +31,55 @@ section{"rom", org=0x8000}
 -- initialize variables
 	mvi a,0x00
 	mov (0xFF90), a
+	mov (0xFF91), a
+	
+	mvi c,0x00
+	mvi b,0x32
+	mvi d,0x00
+@loadspr2
+	--mov a,c
+	--stax (bc) 
+	inr c
+	--mvi a,0x0F
+	mov a,d
+	stax (bc)
+	inr c
+	mov a,c
+	rll a
+	--rll a
+	--stax (bc) 
+	inr c
+	inr c
+	mvi a,0x01
+	add d,a
+	mvi a,0x0F
+	ana d,a
+	eqi c,0x80
+	jmp loadspr2
 
 @loop_1
+	mvi c,0x00
+
+@loop_2
 	mov a, (0xFF90)		-- move the FFDB register (number of INT2))
-	mov b,a
+	add a,c
+	--mov b,a
 	lxi de,sin_wave		-- store sin_wave adress in DE
 	add e,a				-- add a value to low Bit of DE
 	ldax (de)			-- load index in sin_wave table
 	rlr a
 	mvi v,0x40
 	add a,v
-	mov (0x3200),a		-- to the sprite y argument 
 	
+	mvi d,0x32
+	mov (0xFF9F),c
+	mov e,(0xFF9F)
+	stax (de)
+	--mov (0x3200),a		-- to the sprite y argument 
+	
+	mov b, (0xFF91)
 	mvi a,0x1f
+	add a,c
 	add a,b
 	lxi de,sin_wave
 	add e,a
@@ -51,12 +87,29 @@ section{"rom", org=0x8000}
 	rlr a
 	mvi v,0x30
 	add a,v
-	mov (0x3202),a
+	
+	mvi d,0x32
+	inr c
+	inr c
+	mov (0xFF9F),c
+	mov e,(0xFF9F)
+	stax (de)
+	--mov (0x3202),a
+	
+	inr c
+	inr c
+	eqi c,0x80
+	jmp loop_2
 	
 	mov a,(0xFF90)
-	mvi e,0x01
+	mvi e,0x03
 	add a,e
 	mov (0xFF90),a
+	
+	mov a,(0xFF91)
+	mvi e,0x02
+	add a,e
+	mov (0xFF91),a
 	
     --jre loop_1
 	call WVBLANK

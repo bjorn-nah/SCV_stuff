@@ -3,9 +3,11 @@ Sprite atempt for Epoch / Yeno Super Cassette Vision.
 
 Learnings about sprites creation.
 Use l7801 for compilation (https://github.com/BlockoS/l65)
+
 More infos commings...
 
 Sprite data:
+...
 0000 0011 1100 0000		00 3F CF 00
 0000 1111 1111 0000
 
@@ -29,3 +31,4 @@ Sprite data:
 
 0001 1111 1111 0000		10 FA FA 00
 0000 1010 1010 0000
+...

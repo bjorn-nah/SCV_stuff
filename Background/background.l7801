@@ -1,0 +1,76 @@
+require 'scv'
+location(0x8000, 0x8FFF)
+section{"rom", org=0x8000}
+    dc.b 'H'	
+@main
+    di
+	lxi sp,0xFFD2		-- initialize Stack pointer
+    ei
+    calt 0x8C			-- clear text area
+	
+	lxi hl,vdc_data		-- load VDC data
+    lxi de,0x3400
+    mvi c,0x03 
+    block
+	
+
+-- initialize variables
+	mvi a,0x00
+	mov (0xFF90), a
+	mov (0xFF91), a
+	
+	--mvi c,0x42
+	mvi c,0x00
+	mvi b,0x30
+	mvi a,0x00
+@loadChr
+	stax (bc)
+	inr c
+	inr a
+	eqi c,0x00
+	jmp loadChr
+
+	mvi c,0x00
+	mvi b,0x31
+	mvi a,0x00
+@loadChr1
+	stax (bc)
+	inr c
+	inr a
+	eqi c,0x00
+	jmp loadChr1
+	
+
+@loop_1
+	
+	--increment method
+	mov a,(0xFF91)
+	mvi e,0x01
+	add a,e
+	mov (0xFF91),a
+	
+	mov d,a
+	
+	eqi d,0x00
+	jmp dontadd
+	clc
+	mov a,(0xFF90)
+	mvi e,0x01
+	adc a,e
+	mov (0xFF90),a
+	clc
+@dontadd
+	
+	call WVBLANK
+	jmp loop_1
+
+section{"WVBLANK", org=0x8200}
+	skit f2            -- wait until acknowledged
+	jr  WVBLANK
+	ret
+	
+section{"vdc_data", org=0x8300}
+	dc.b 0xD0,0x00,0x00,0xF8
+
+	
+writebin(filename .. '.bin')

@@ -19,26 +19,36 @@ section{"rom", org=0x8000}
 	mov (0xFF90), a
 	mov (0xFF91), a
 	
-	--mvi c,0x42
-	mvi c,0x00
-	mvi b,0x30
+	mvi c,0x44
+	--mvi c,0x00
+	mvi b,0x00
 	mvi a,0x00
+	mvi d,0x30
 @loadChr
-	stax (bc)
+	mov (0xFF9F),c
+	mov e,(0xFF9F)
+	stax (de)
+	inr b
 	inr c
 	inr a
-	eqi c,0x00
-	jmp loadChr
+	eqi b,0x16
+	jmp noLine
+	mvi b,0x00
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
 
-	mvi c,0x00
-	mvi b,0x31
-	mvi a,0x00
-@loadChr1
-	stax (bc)
-	inr c
-	inr a
-	eqi c,0x00
-	jmp loadChr1
+@noLine
+	
+	eqi a,0x80	-- after 0x80, the charset seem to loop
+	jmp loadChr
 	
 
 @loop_1

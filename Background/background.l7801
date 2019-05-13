@@ -50,6 +50,37 @@ section{"rom", org=0x8000}
 	eqi a,0x80	-- after 0x80, the charset seem to loop
 	jmp loadChr
 	
+	mvi c,0x04
+	--mvi c,0x00
+	mvi b,0x00
+	mvi a,0x00
+	mvi d,0x31
+@loadChr2
+	mov (0xFF9F),c
+	mov e,(0xFF9F)
+	stax (de)
+	inr b
+	inr c
+	inr a
+	eqi b,0x16
+	jmp noLine2
+	mvi b,0x00
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+
+@noLine2
+	
+	eqi a,0x80	-- after 0x80, the charset seem to loop
+	jmp loadChr2
+	
 
 @loop_1
 	
@@ -80,7 +111,8 @@ section{"WVBLANK", org=0x8200}
 	ret
 	
 section{"vdc_data", org=0x8300}
-	dc.b 0xD0,0x00,0x00,0xF8
+	--dc.b 0xD0,0x00,0x00,0xF8
+	dc.b 0x91,0x08,0x8F,0xF8
 
 	
 writebin(filename .. '.bin')

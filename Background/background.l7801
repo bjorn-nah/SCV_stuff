@@ -19,6 +19,88 @@ section{"rom", org=0x8000}
 	mov (0xFF90), a
 	mov (0xFF91), a
 	
+@loop_1
+
+	mov a,(0xFF91)
+	eqi a,0x00
+	jmp nochange
+	
+	--call CLRSCRN
+	calt 0x8C			-- clear text area
+	
+	mov a,(0xFF90)
+	eqi a,0x00
+	jmp noTxtCll
+	call SCRTXT
+@noTxtCll
+
+	mov a,(0xFF90)
+	eqi a,0x01
+	jmp noGrxCll
+	call SCRSGPH
+@noGrxCll
+	
+@nochange
+	
+	--increment method
+	mov a,(0xFF91)
+	mvi e,0x01
+	add a,e
+	mov (0xFF91),a
+	
+	mov d,a
+	
+	eqi d,0x00
+	jmp dontadd
+	clc
+	mov a,(0xFF90)
+	mvi e,0x01
+	adc a,e
+	mov (0xFF90),a
+	clc
+@dontadd
+	
+	mov a,(0xFF90)
+	eqi a,0x02
+	jmp dontrst
+	mvi a,0x00
+	mov (0xFF90),a
+@dontrst
+	
+	call WVBLANK
+	jmp loop_1
+
+section{"WVBLANK", org=0x8200}
+	skit f2            -- wait until acknowledged
+	jr  WVBLANK
+	ret
+	
+section{"CLRSCRN", org=0x8300}
+	mvi a,0x00
+	mvi b,0x30
+	mvi c,0x00
+@clrLoop1
+	stax (bc)
+	inr c
+	eqi c,0x00
+	jmp clrLoop1
+	
+	mvi b,0x31
+	mvi c,0x00
+@clrLoop2
+	stax (bc)
+	inr c
+	eqi c,0x00
+	jmp clrLoop2
+	
+	ret
+	
+section{"SCRTXT", org=0x8400}
+	lxi hl,vdc_data		-- load VDC data
+    lxi de,0x3400
+    mvi c,0x03 
+    block
+	
 	mvi c,0x44
 	--mvi c,0x00
 	mvi b,0x00
@@ -49,11 +131,48 @@ section{"rom", org=0x8000}
 	
 	eqi a,0x80	-- after 0x80, the charset seem to loop
 	jmp loadChr
+	ret
+	
+section{"SCRSGPH", org=0x8500}
+	lxi hl,vdc_sgrph	-- load VDC data
+    lxi de,0x3400
+    mvi c,0x03 
+    block
+
+	mvi c,0x44
+	mvi b,0x00
+	mvi a,0x00
+	mvi d,0x30
+@loadChr1
+	mov (0xFF9F),c
+	mov e,(0xFF9F)
+	stax (de)
+	inr b
+	inr c
+	inr a
+	eqi b,0x16
+	jmp noLine1
+	mvi b,0x00
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+	inr c
+
+@noLine1
+	
+	eqi a,0x80	-- after 0x80, the charset seem to loop
+	jmp loadChr1
 	
 	mvi c,0x04
 	--mvi c,0x00
 	mvi b,0x00
-	mvi a,0x00
+	mvi a,0x80
 	mvi d,0x31
 @loadChr2
 	mov (0xFF9F),c
@@ -78,41 +197,16 @@ section{"rom", org=0x8000}
 
 @noLine2
 	
-	eqi a,0x80	-- after 0x80, the charset seem to loop
+	eqi a,0x00	-- after 0x80, the charset seem to loop
 	jmp loadChr2
-	
 
-@loop_1
-	
-	--increment method
-	mov a,(0xFF91)
-	mvi e,0x01
-	add a,e
-	mov (0xFF91),a
-	
-	mov d,a
-	
-	eqi d,0x00
-	jmp dontadd
-	clc
-	mov a,(0xFF90)
-	mvi e,0x01
-	adc a,e
-	mov (0xFF90),a
-	clc
-@dontadd
-	
-	call WVBLANK
-	jmp loop_1
-
-section{"WVBLANK", org=0x8200}
-	skit f2            -- wait until acknowledged
-	jr  WVBLANK
 	ret
 	
-section{"vdc_data", org=0x8300}
-	--dc.b 0xD0,0x00,0x00,0xF8
-	dc.b 0x91,0x08,0x8F,0xF8
+section{"vdc_data", org=0x8F00}
+	dc.b 0xD0,0x00,0x00,0xF8
+	
+section{"vdc_sgrph", org=0x8F10}
+	dc.b 0x91,0x08,0xFF,0xF8
 
 	
 writebin(filename .. '.bin')

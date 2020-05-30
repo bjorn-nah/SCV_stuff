@@ -215,12 +215,12 @@ section{"SCRIMGGPH", org=0x8600}
     block
 	
 	lxi hl,bg_data
-    lxi de,0x3020
+    lxi de,0x3000
     mvi c,0xFF
     block
 	
 	lxi hl,0x8B00
-    lxi de,0x3120
+    lxi de,0x3100
     mvi c,0xFF
     block
 	

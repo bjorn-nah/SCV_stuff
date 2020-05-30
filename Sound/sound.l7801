@@ -1,0 +1,87 @@
+require 'scv'
+location(0x8000, 0x8FFF)
+section{"rom", org=0x8000}
+    dc.b 'H'	
+@main
+    di
+	lxi sp,0xFFD2		-- initialize Stack pointer
+    ei
+    calt 0x8C			-- clear text area
+	
+	lxi hl,vdc_data		-- load VDC data
+    lxi de,0x3400
+    mvi c,0x03 
+    block
+	
+	lxi	hl,txt_data
+	lxi de,0x3144
+	mvi c,0x06
+	block
+
+@loop	
+	-- Tone Start
+
+	lxi de,PARAMS	
+	lxi hl,0x3600
+	ldaxi (de)
+
+	di
+	call WVBLANK
+	skit f1
+	
+	-- instrument params start
+	mvi a,2                 -- tone!	
+	stax (hl)   
+	call WD1771G            -- cwait on intf1
+	ldaxi (de)		
+	stax (hl)   
+	call WD1771G            -- cwait on intf1
+	ldaxi (de)		
+	stax (hl)   
+	call WD1771G            -- cwait on intf1
+	ldaxi (de)		
+	stax (hl)   
+	call WVBLANK            -- cwait on intf2
+	-- instrument params end
+	ei	
+    
+	jmp loop
+
+section{"WVBLANK", org=0x8200}
+	skit f2            -- wait until acknowledged
+	jr  WVBLANK
+	ret
+	
+section{"WD1771G", org=0x8220}
+	skit f1
+   	jr  WD1771G
+	ret
+	
+section{"vdc_data", org=0x8300}
+	dc.b 0xD0,0x00,0x00,0xF8
+
+section{"txt_data", org=0x8350}
+	dc.b "Honk :V"
+	
+@PARAMS	
+	-- params
+	dc.b 0x02	
+	dc.b 0x80	
+	dc.b 0xFF	
+	dc.b 0x1F	
+	
+	dc.b 0xAB	
+	dc.b 0xFE	
+	dc.b 0xCD	
+	dc.b 0xDC	
+	dc.b 0x45	
+	dc.b 0x01	
+	
+	dc.b 0x00	  -- FF9A curent param
+	dc.b 0x00	  -- FF9B BOOL note on
+	dc.b 0x83	  -- misc
+	dc.b 0x39	  -- misc
+	dc.b 0x44	  -- misc
+	dc.b 0x36	  -- misc
+	
+writebin(filename .. '.bin')

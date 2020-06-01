@@ -1,4 +1,4 @@
-# Sprite
+# Sound
 Sound atempts for Epoch / Yeno Super Cassette Vision.
 
 Learnings about sound generation.

@@ -1,0 +1,160 @@
+require 'scv'
+location(0x8000, 0x8FFF)
+section{"rom", org=0x8000}
+    dc.b 'H'	
+@main
+    di
+	lxi sp,0xFFD2		-- initialize Stack pointer
+    ei
+    calt 0x8C			-- clear text area
+	
+	lxi hl,vdc_data		-- load VDC data
+    lxi de,0x3400
+    mvi c,0x03 
+    block
+	
+-------------------------
+-- Print Screen Format --
+-------------------------
+	lxi	hl,DISPLAY_DATA
+	lxi	de,0x3040           -- Text RAM Address
+	lxi	bc,0x0180
+@loop0
+	block
+	dcr	b
+	jr	loop0
+
+@loop
+
+	mvi a,0xFE 				-- select the input line FE
+	mov pa,a                -- fill port with voltages
+	mov a,pb	            -- see which are closed upon return            
+	
+	lxi de,0x308B
+	call PRINT_HEX
+	
+	mvi a,0xFD 				-- select the input line FD
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x30AB
+	call PRINT_HEX
+	
+	mvi a,0xFB 				-- select the input line FB
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x30CB
+	call PRINT_HEX
+	
+	mvi a,0xF7 				-- select the input line F7
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x30EB
+	call PRINT_HEX
+	
+	mvi a,0xEF 				-- select the input line EF
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x310B
+	call PRINT_HEX
+	
+	mvi a,0xDF 				-- select the input line DF
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x312B
+	call PRINT_HEX
+	
+	mvi a,0xBF 				-- select the input line BF
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x314B
+	call PRINT_HEX
+	
+	mvi a,0x7F 				-- select the input line 7F
+	mov pa,a                
+	mov a,pb	            
+	
+	lxi de,0x316B
+	call PRINT_HEX
+    
+	call WVBLANK
+	jmp loop
+	
+	
+-------------------------------------------------------------------------
+-- Print ONE UINT8_T on screen as HEX (two screen chars printed)
+--					
+-- A should contain the hex value to print (A returns unchanged)
+-- D should contain the screen value to dump the high part	(D returns unchanged)	
+-- V is thrashed (used as temporary val)
+-------------------------------------------------------------------------
+section{"PRINT_HEX", org=0x8100}
+	mvi v,0         -- trick to do V=A 
+	add v,a         -- trick to do V=A
+
+	ani  a,0xF0     -- a = a & 0x0f;
+	clc             -- clear carry so not to fuck up the following right shifts
+	rlr  a          --
+	rlr  a          --
+	rlr  a          --
+	rlr  a          -- ok we got the HEX value for the up 4bits
+	
+	gti a,0x09
+	jr HIGH_GREATER
+	jr HIGH_LOWER
+@HIGH_GREATER
+	adi a,0x30      -- a+='0'  (ascii)
+	jr HIGH_DONE
+@HIGH_LOWER	
+	adi a,0x37      -- a+=('A'-10)  (ascii)
+	jr HIGH_DONE	
+@HIGH_DONE
+	
+	staxi (de)      -- 
+		
+	mvi a,0         -- trick to do A=V
+	add a,v         -- trick to do A=V		
+	ani a,0x0F      -- a = a & 0x0f
+	
+	gti a,0x09
+	jr LOW_GREATER
+	jr LOW_LOWER
+@LOW_GREATER
+	adi a,0x30      -- a+='0'  (ascii)
+	jr LOW_DONE
+@LOW_LOWER
+	adi a,0x37      -- a+=('A'-10)  (ascii)
+	jr LOW_DONE	
+@LOW_DONE
+	
+	staxd (de)      -- 
+	mvi a,0         -- trick to do A=V
+	add a,v         -- trick to do A=V	
+	ret
+
+section{"WVBLANK", org=0x8200}
+	skit f2            -- wait until acknowledged
+	jr  WVBLANK
+	ret
+	
+section{"vdc_data", org=0x8210}
+	dc.b 0xD0,0x00,0x00,0xF8
+	
+@DISPLAY_DATA
+	dc.b "    Input Tester                "	
+	dc.b "    Lines:                      "
+	dc.b "      $fe:                      "
+	dc.b "      $fd:                      "
+	dc.b "      $fb:                      "
+	dc.b "      $f7:                      "
+	dc.b "      $ef:                      "
+	dc.b "      $df:                      "
+	dc.b "      $bf:                      "
+	dc.b "      $7f:                      "
+	
+writebin(filename .. '.bin')

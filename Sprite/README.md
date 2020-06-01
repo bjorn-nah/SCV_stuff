@@ -4,7 +4,10 @@ Sprite atempt for Epoch / Yeno Super Cassette Vision.
 Learnings about sprites creation.
 Use l7801 for compilation (https://github.com/BlockoS/l65)
 
-More infos commings...
+# Notes
+SCV can display 128 sprites, but 64 first ones are "background" ones.
+The backgrounds sprites are monochronic only (1 color + tranparancy), the last 64 ones can be multocolor (2 color + tranparancy I presume?)
+
 
 Sprite data:
 ```
@@ -32,3 +35,6 @@ Sprite data:
 0001 1111 1111 0000		10 FA FA 00
 0000 1010 1010 0000
 ```
+
+# Todo
+Test multocolor mode
